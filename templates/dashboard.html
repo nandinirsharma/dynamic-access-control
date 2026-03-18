@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dynamic DAC — Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/static/dashboard.css" />
+  <style>
+    .badge { padding:4px 8px; border-radius:8px; font-weight:600; }
+    .badge.low { background:#e6ffef; color:#0b8a3e; }
+    .badge.medium { background:#fff7e6; color:#b36b00; }
+    .badge.high { background:#ffecec; color:#a00; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Dynamic DAC — Dashboard</h1>
+
+    <div style="display:flex; justify-content:flex-end; gap:8px; margin-bottom:12px;">
+      <div id="whoAmI" style="align-self:center;color:#333;"></div>
+      <button id="logoutBtn">Logout</button>
+    </div>
+
+    <section class="card">
+      <h2>Make a request as a user</h2>
+      <div class="row">
+        <div class="panel">
+          <label>JWT Token (auto-filled after login)</label>
+          <textarea id="userToken" placeholder="Paste user JWT token here"></textarea>
+
+          <div style="margin-top:8px;">
+            <label>Resource ID</label>
+            <input id="resource" type="text" value="test-resource" />
+          </div>
+
+          <!-- REQUEST BODY REMOVED AS REQUESTED -->
+
+          <div class="btn-row" style="margin-top:10px;">
+            <button id="btnGetRisk">Get risk / Request resource</button>
+            <button id="btnClear">Clear output</button>
+            <span class="small-inline">Tip: use <code>/login</code> to get fresh tokens if expired.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Result (summary)</h2>
+      <div id="resultSummary" class="card" style="padding:12px;">
+        <div id="resultHeader">No request made yet.</div>
+        <div id="resultMain" style="margin-top:8px; font-family:monospace;"></div>
+      </div>
+
+      <h3 style="margin-top:8px;">Details (parsed)</h3>
+      <pre id="resultDetails" class="details">(no details)</pre>
+
+      <h3 style="margin-top:8px;">Raw response</h3>
+      <pre id="resultRaw" class="raw">(no response)</pre>
+    </section>
+
+    <!-- ACCESS LOGS PANEL REMOVED AS REQUESTED -->
+
+    <div class="footer">Dashboard — displays the same risk output you see in Postman. </div>
+  </div>
+
+  <script src="/static/dashboard.js"></script>
+  <script>
+    // small bootstrap: ensure token present or redirect to login page
+    (function() {
+      try {
+        const saved = localStorage.getItem("access_token");
+        if (saved && saved.length > 10) {
+          document.getElementById('userToken').value = saved;
+          // optionally show who is logged in by decoding token's sub (if encoded username)
+          // quick hack: try to get username from token payload (unsafe, only UI)
+          try {
+            const parts = saved.split('.');
+            if (parts.length >= 2) {
+              const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+              document.getElementById('whoAmI').textContent = "Signed-in: " + (payload.sub || payload.username || "");
+            }
+          } catch(e) {}
+        } else {
+          window.location.href = "/login_page";
+        }
+      } catch (e) {
+        window.location.href = "/login_page";
+      }
+
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        try{ localStorage.removeItem('access_token'); } catch(e){}
+        window.location.href = "/login_page";
+      });
+    })();
+  </script>
+</body>
+</html>

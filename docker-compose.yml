@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  opa:
+    image: openpolicyagent/opa:0.50.1
+    ports:
+      - "8181:8181"
+    volumes:
+      - ./policy:/policy
+    command: ["run", "--server", "--watch", "/policy"]
+    restart: unless-stopped

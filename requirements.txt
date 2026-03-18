@@ -1,0 +1,5 @@
+Flask==2.3.2
+flask-cors==4.0.0
+requests==2.31.0
+python-jose==3.3.0
+cryptography==41.0.3

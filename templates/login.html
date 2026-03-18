@@ -1,0 +1,71 @@
+<!-- templates/login.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login — Dynamic DAC</title>
+  <link rel="stylesheet" href="/static/dashboard.css" />
+  <style>
+    body { background:#f7f8fb; font-family:Inter,Segoe UI,Helvetica,Arial,sans-serif; }
+    .center { max-width:420px; margin:60px auto; }
+    .card { background:#fff; padding:20px; border-radius:10px; box-shadow:0 6px 18px rgba(20,20,40,0.06); }
+    input { width:100%; padding:10px; margin-top:6px; border:1px solid #ddd; border-radius:6px; }
+    button { padding:10px 14px; border-radius:6px; cursor:pointer; }
+    .muted { color:#666; font-size:13px; margin-top:10px; }
+    a.link { color:#0a66ff; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="center">
+    <div class="card">
+      <h2>Sign In</h2>
+      <div>
+        <label>Username</label>
+        <input id="loginUsername" type="text" placeholder="your username" />
+      </div>
+      <div style="margin-top:10px;">
+        <label>Password</label>
+        <input id="loginPassword" type="password" placeholder="your password" />
+      </div>
+      <div style="margin-top:10px;">
+        <label>Device type (optional - e.g. desktop, mobile)</label>
+        <input id="loginDevice" type="text" placeholder="device type (optional)" />
+      </div>
+      <div style="margin-top:12px; display:flex; gap:8px;">
+        <button id="loginBtn">Login</button>
+      </div>
+
+      <div id="loginMsg" class="muted"></div>
+      <div class="muted" style="margin-top:12px;">
+        Don't have an account? <a class="link" href="/register_page">Create one</a>.
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/auth.js"></script>
+  <script>
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const u = document.getElementById('loginUsername').value.trim();
+      const p = document.getElementById('loginPassword').value;
+      const d = document.getElementById('loginDevice').value.trim();
+      const msgEl = document.getElementById('loginMsg');
+      msgEl.textContent = "";
+      if (!u || !p) { msgEl.textContent = "Enter username and password"; return; }
+
+      msgEl.textContent = "Logging in...";
+      const res = await window.authLogin(u, p, d);
+      if (res.ok) {
+        msgEl.textContent = "Login successful — redirecting to dashboard...";
+        setTimeout(()=> window.location.href = "/", 800);
+      } else {
+        if (res.status === 401) {
+          msgEl.textContent = "Login failed: invalid credentials";
+        } else {
+          msgEl.textContent = "Login error: " + (res.raw && (res.raw.error || res.raw.message) ? (res.raw.error||res.raw.message) : "network/error");
+        }
+      }
+    });
+  </script>
+</body>
+</html>

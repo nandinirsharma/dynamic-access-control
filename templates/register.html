@@ -1,0 +1,72 @@
+<!-- templates/register.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Register — Dynamic DAC</title>
+  <link rel="stylesheet" href="/static/dashboard.css" />
+  <style>
+    body { background:#f7f8fb; font-family:Inter,Segoe UI,Helvetica,Arial,sans-serif; }
+    .center { max-width:420px; margin:60px auto; }
+    .card { background:#fff; padding:20px; border-radius:10px; box-shadow:0 6px 18px rgba(20,20,40,0.06); }
+    input { width:100%; padding:10px; margin-top:6px; border:1px solid #ddd; border-radius:6px; }
+    button { padding:10px 14px; border-radius:6px; cursor:pointer; }
+    .muted { color:#666; font-size:13px; margin-top:10px; }
+    a.link { color:#0a66ff; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="center">
+    <div class="card">
+      <h2>Create account</h2>
+      <div>
+        <label>Username</label>
+        <input id="regUsername" type="text" placeholder="choose a username" />
+      </div>
+      <div style="margin-top:10px;">
+        <label>Password</label>
+        <input id="regPassword" type="password" placeholder="choose a password" />
+      </div>
+      <div style="margin-top:10px;">
+        <label>Device type (optional)</label>
+        <input id="regDevice" type="text" placeholder="device type (optional)" />
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:8px;">
+        <button id="registerBtn">Register</button>
+        <button id="toLogin" style="background:transparent;border:1px solid #ddd;">Back to Login</button>
+      </div>
+
+      <div id="regMsg" class="muted"></div>
+      <div class="muted" style="margin-top:12px;">
+        Already registered? <a class="link" href="/login_page">Sign in</a>.
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/auth.js"></script>
+  <script>
+    document.getElementById('registerBtn').addEventListener('click', async () => {
+      const u = document.getElementById('regUsername').value.trim();
+      const p = document.getElementById('regPassword').value;
+      const d = document.getElementById('regDevice').value.trim();
+      const msgEl = document.getElementById('regMsg');
+      msgEl.textContent = "";
+      if (!u || !p) { msgEl.textContent = "Enter username and password"; return; }
+      msgEl.textContent = "Registering...";
+      const res = await window.authRegister(u, p, d);
+      if (res.status === 201) {
+        msgEl.textContent = "Registered — redirecting to login...";
+        setTimeout(() => window.location.href = "/login_page", 900);
+      } else if (res.status === 409) {
+        msgEl.textContent = "Username already exists — please sign in.";
+      } else {
+        msgEl.textContent = "Registration failed: " + (res.raw && (res.raw.error||res.raw.message) ? (res.raw.error||res.raw.message) : "unknown");
+      }
+    });
+
+    document.getElementById('toLogin').addEventListener('click', () => { window.location.href = "/login_page"; });
+  </script>
+</body>
+</html>
